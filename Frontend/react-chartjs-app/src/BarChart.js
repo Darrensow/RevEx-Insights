@@ -6,14 +6,14 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const BarChart = () => {
     const data = {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
         datasets: [
             {
-                label: 'Sales 2023 (M)',
-                data: [-8, 2, 2, 1, 5, 6, 7],
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                label: 'Amount (USD)',
+                data: [-8, -2, -1, 1, 4, 5, 8, 6, 4, 2, 1, -2],
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
                 borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1,
+                borderWidth: 3,
             },
         ],
     };

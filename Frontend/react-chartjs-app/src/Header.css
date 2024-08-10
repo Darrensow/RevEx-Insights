@@ -4,7 +4,7 @@
     align-items: center;
     width: 100%;
     padding: 20px;
-    background-color: #282c34;
+    background-color: 'rgba(54, 162, 235, 0.6)';
     color: white;
     border-bottom: 1px solid #ccc;
   }
