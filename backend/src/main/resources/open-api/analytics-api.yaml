@@ -1,0 +1,99 @@
+openapi: 3.0.0
+
+info:
+  title: Analytics
+  description: API for handling analytics data.
+  version: 0.1.0
+
+tags:
+  - name: Analytics
+    description: Endpoints related to analytics data
+
+paths:
+  /initiate-analytics-dashboard:
+    get:
+      tags:
+        - Analytics
+      operationId: initiateAnalyticsDashboard
+      summary: Initiate necessary fields in dashboard.
+      description: >
+        Returns the filters and other fields for dashboard functionalities.
+      responses:
+        '200':
+          description: A JSON array of analytics data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: Unique identifier for the analytics data
+                  example: "12345"
+
+  /get-timeline-data:
+    get:
+      tags:
+        - Analytics
+      operationId: getTimelineData
+      summary: Retrieve timeline data for the dashboard.
+      description: >
+        Returns the filters and other fields for dashboard functionalities.
+      parameters:
+        - name: dateFrom
+          in: query
+          required: true
+          description: Start date for the timeline data
+          schema:
+            type: string
+            format: date
+            example: "2024-08-01"
+        - name: dateTo
+          in: query
+          required: true
+          description: End date for the timeline data
+          schema:
+            type: string
+            format: date
+            example: "2024-08-10"
+        - name: department
+          in: query
+          required: true
+          description: Department to filter the timeline data
+          schema:
+            type: string
+            example: "Finance"
+      responses:
+        '200':
+          description: A JSON array of timeline items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimelineItem'
+
+components:
+  schemas:
+    TimelineItem:
+      type: object
+      description: Used to display the time series line chart for analytics
+      properties:
+        amount:
+          type: string
+          format: bigdecimal
+          description: The y-value representing the amount
+          example: "12345.67"
+        timestamp:
+          type: string
+          format: date-time
+          description: The x-value representing the timestamp
+          example: "2024-08-10T14:48:00Z"
+        label:
+          type: string
+          description: A label for the timeline item
+          example: "Revenue"
+        surplusOrDeficit:
+          type: string
+          format: bigdecimal
+          description: The percentage of surplus or deficit
+          example: "5.00"

@@ -1,7 +1,17 @@
+//buildscript {
+//	repositories {
+//		mavenCentral()
+//	}
+//	dependencies {
+//		classpath('io.swagger.codegen.v3:swagger-codegen-maven-plugin:3.0.16')
+//	}
+//}
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.2'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id 'org.openapi.generator' version '7.7.0'
 }
 
 group = 'com.revex'
@@ -31,8 +41,53 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// Swagger and OpenAPI dependencies
+	implementation 'io.swagger.core.v3:swagger-annotations:2.2.8'
+	implementation 'io.swagger.core.v3:swagger-core:2.2.8'
+	implementation 'javax.validation:validation-api:2.0.1.Final'
+	implementation 'javax.annotation:javax.annotation-api:1.3.2'
+	implementation 'org.openapitools:jackson-databind-nullable:0.2.1'
+	implementation 'javax.servlet:javax.servlet-api:4.0.1'
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
+openApiGenerate {
+	generatorName = "spring"
+	inputSpec = "${rootDir}/src/main/resources/open-api/analytics-api.yaml"  // Update this path to your actual OpenAPI spec file
+	outputDir = "${buildDir}/generated-sources"
+	apiPackage = "com.revex.backend.api"
+	modelPackage = "com.revex.backend.model"
+	invokerPackage = "com.revex.backend.invoker"
+	configOptions = [
+			dateLibrary: "java8"
+	]
+	additionalProperties = [
+			"useTags": "true"  // This tells the generator to group by tags
+	]
+	globalProperties = [
+			"modelDocs": "false",  // Disable model documentation
+			"apiDocs": "false",    // Disable API documentation
+			"configFile": "openapi-generator.properties"  // Use the properties file
+	]
+	importMappings = [
+			"TimelineItem": "com.revex.backend.model.TimelineItem"
+	]
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "${buildDir}/generated-sources/src/main/java"
+		}
+	}
+}
+
+compileJava.dependsOn tasks.openApiGenerate
+
+springBoot {
+	mainClass.set("com.revex.backend.BackendApplication")
+}
+
+bootRun {
+	mainClass.set("com.revex.backend.BackendApplication")
 }
