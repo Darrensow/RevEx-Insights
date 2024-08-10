@@ -1,0 +1,51 @@
+.App {
+  text-align: center;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+.chart-container {
+  display: grid;
+  grid-template-areas:
+    'pie-chart line-chart'
+    'bar-chart .';
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 20px;
+  width: 80%;
+  height: 80%;
+}
+
+.chart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ccc;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+}
+
+.pie-chart {
+  grid-area: pie-chart;
+}
+
+.line-chart {
+  grid-area: line-chart;
+}
+
+.bar-chart {
+  grid-area: bar-chart;
+}
+
+canvas {
+  max-width: 100%;
+  max-height: 100%;
+}
