@@ -72,20 +72,146 @@ paths:
                 items:
                   $ref: '#/components/schemas/TimelineItem'
 
+  /get-top-n-fund-description-breakdown:
+    post:
+      tags:
+        - Analytics
+      operationId: getTopNFundDescriptionBreakdown
+      summary: TO WRITE LATER
+      description: >
+        TO WRITE LATER.
+      requestBody:
+        description: A JSON array of timeline items
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AnalyticsEnquiryModel'
+      responses:
+        '200':
+          description: A JSON array of timeline items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimelineItem' # this one have to modify, discuss together tomorrow
+
+  /get-cumulative-revenue-and-expenses:
+    post:
+      tags:
+        - Analytics
+      operationId: getCumulativeRevenueAndExpenses
+      summary: TO WRITE LATER.
+      description: >
+        WRITE LATER.
+      requestBody:
+        description: A JSON array of timeline items
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AnalyticsEnquiryModel'
+      responses:
+        '200':
+          description: A JSON array of timeline items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimelineItem' # this one have to modify, discuss together tomorrow
+
+  /get-department-revenue-and-expenses-breakdown:
+    post:
+      tags:
+        - Analytics
+      operationId: getDepartmentRevenueAndExpensesBreakdown
+      summary: TO WRITE LATER.
+      description: >
+        WRITE LATER.
+      requestBody:
+        description: A JSON array of timeline items
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AnalyticsEnquiryModel'
+      responses:
+        '200':
+          description: A JSON array of timeline items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimelineItem' # this one have to modify, discuss together tomorrow
+
+  /get-fund-description-revenue-and-expenses-breakdown:
+    post:
+      tags:
+        - Analytics
+      operationId: getFundDescriptionRevenueAndExpensesBreakdown
+      summary: TO WRITE LATER.
+      description: >
+        WRITE LATER.
+      requestBody:
+        description: A JSON array of timeline items
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AnalyticsEnquiryModel'
+      responses:
+        '200':
+          description: A JSON array of timeline items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimelineItem' # this one have to modify, discuss together tomorrow
+
 components:
   schemas:
+    AnalyticsEnquiryModel:
+      type: object
+      description: Model used to enquire/request for data based on defined filters and fields
+      properties:
+        topNRanks:
+          type: number
+          description: The top N ranks to return
+          example: "5"
+        dateFrom:
+          type: string
+          format: date
+          description: Starting date of filter
+          example: "2024-08-10T14:48:00Z"
+        dateTo:
+          type: string
+          format: date
+          description: Ending date of filter
+          example: "2024-08-30T14:48:00Z"
+        department:
+          type: string
+          description: Variable used for filtering based on departments
+          example: "Police Department"
+
     TimelineItem:
       type: object
       description: Used to display the time series line chart for analytics
       properties:
         amount:
-          type: string
-          format: bigdecimal
+          type: number
           description: The y-value representing the amount
           example: "12345.67"
         timestamp:
           type: string
-          format: date-time
+          format: date
           description: The x-value representing the timestamp
           example: "2024-08-10T14:48:00Z"
         label:
@@ -93,7 +219,6 @@ components:
           description: A label for the timeline item
           example: "Revenue"
         surplusOrDeficit:
-          type: string
-          format: bigdecimal
+          type: number
           description: The percentage of surplus or deficit
           example: "5.00"
