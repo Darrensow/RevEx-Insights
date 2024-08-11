@@ -28,7 +28,7 @@ paths:
                 items:
                   type: string
                   description: List of departments that are available to be used as filters
-                  example: "Department of Public Safety - Police"
+                  example: "DepartmentBean of Public Safety - Police"
 
   /get-timeline-data:
     get:
@@ -39,22 +39,22 @@ paths:
       description: >
         Returns the filters and other fields for dashboard functionalities.
       parameters:
-        - name: year
-          in: query
-          description: Start date for the timeline data
-          schema:
-            type: number
-            format: date
-            example: "2012"
         - name: period
           in: query
           description: End date for the timeline data
           schema:
             type: string
             example: "[Quarterly, Yearly, Monthly]"
-        - name: department
+        - name: year
           in: query
-          description: Department to filter the timeline data
+          description: Start date for the timeline data
+          schema:
+            type: integer
+            format: date
+            example: "2012"
+        - name: departmentNameKey
+          in: query
+          description: DepartmentBean to filter the timeline data
           schema:
             type: string
             example: "Finance"
@@ -193,7 +193,7 @@ components:
         department:
           type: string
           description: Variable used for filtering based on departments
-          example: "Police Department"
+          example: "Police DepartmentBean"
 
     TimelineResponseModel:
       type: object
@@ -219,20 +219,15 @@ components:
       type: object
       description: Used to display the time series line chart for analytics
       properties:
-        timelineItemType:
+        ledgerDescription:
           type: string
           description: A label for the timeline item whether this is a revenue or an expenses
           example: "[Revenue, Expenses, SurplusDeficit]"
-        timestamp:
-          type: string
-          format: date
-          description: The x-value representing the timestamp (Year, Month or Day)
-          example: "2024-08-10T14:48:00Z"
-        timestampDisplay:
+        period:
           type: string
           description: The x-value used for display to represent the timestamp
           example: "[2012, ..., 2020] OR [January, ..., December] OR [1, 2, ..., 31]"
-        timelineAmount:
+        amount:
           type: number
           description: The y-value representing the amount of revenue or expenses or surplusDeficit (%)
           example: "373000"
