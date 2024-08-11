@@ -20,15 +20,21 @@ paths:
         Returns the filters and other fields for dashboard functionalities.
       responses:
         '200':
-          description: A JSON array of analytics data
+          description: A JSON array of department names (for display) and keys (for filtering)
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  type: string
-                  description: List of departments that are available to be used as filters
-                  example: "DepartmentBean of Public Safety - Police"
+                  type: object
+                  additionalProperties:
+                    type: string
+                  description: A map where the key is the department name and the value is the department name key
+                  example: >
+                    Mayor's Office: MAYORS_OFFICE
+                    Innovation and Performance: INNOVATION_AND_PERFORMANCE
+                    Human Relations Commission: HUMAN_RELATIONS_COMMISSION
+                    Controller's Office: CONTROLLERS_OFFICE
 
   /get-timeline-data:
     get:

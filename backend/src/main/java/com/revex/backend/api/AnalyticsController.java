@@ -1,6 +1,7 @@
 package com.revex.backend.api;
 
 import com.revex.backend.model.TimelineResponseModel;
+import com.revex.backend.service.DepartmentService;
 import com.revex.backend.service.LedgerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -17,6 +19,7 @@ import java.util.List;
 public class AnalyticsController implements AnalyticsApi {
 
     private final LedgerService ledgerService;
+    private final DepartmentService departmentService;
 
     @GetMapping("/get-timeline-data")
     public ResponseEntity<TimelineResponseModel> getTimelineData(
@@ -37,8 +40,10 @@ public class AnalyticsController implements AnalyticsApi {
 
     @Override
     @GetMapping("/initiate-analytics-dashboard")
-    public ResponseEntity<List<String>> initiateAnalyticsDashboard() {
-        // Implement your logic here
-        return null;
+    public ResponseEntity<List<Map<String, String>>> initiateAnalyticsDashboard() {
+        String logPrefix = "initiateAnalyticsDashboard";
+        List<Map<String, String>> departmentNamesAndKeysMap = departmentService.getDepartmentNamesAndKeysAsMap();
+        log.info(logPrefix + " departmentNamesAndKeysMap : {}", departmentNamesAndKeysMap);
+        return new ResponseEntity<>(departmentNamesAndKeysMap, HttpStatus.OK);
     }
 }
