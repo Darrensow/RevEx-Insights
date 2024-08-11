@@ -1,9 +1,7 @@
 package com.revex.backend.model.repository;
 
 import com.revex.backend.model.entity.LedgerBean;
-import com.revex.backend.model.projection.ExpensesBreakdownProjection;
-import com.revex.backend.model.projection.RevenueAndExpensesBreakdownProjection;
-import com.revex.backend.model.projection.TimelineItemProjection;
+import com.revex.backend.model.projection.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -64,6 +62,32 @@ public interface LedgerRepository extends JpaRepository<LedgerBean, Integer> {
     List<ExpensesBreakdownProjection> findExpensesBreakdownByYearAndDepartment(
             @Param("year") Integer year,
             @Param("department_name_key") String departmentNameKey
+    );
+
+    @Query(value = "SELECT " +
+            "d.department_name AS departmentName, " +
+            "SUM(CASE WHEN l.ledger_description = 'Revenues' THEN l.amount ELSE 0 END) AS revenue, " +
+            "SUM(CASE WHEN l.ledger_description = 'Expenses' THEN l.amount ELSE 0 END) AS expenses " +
+            "FROM ledger l " +
+            "JOIN department d ON l.department_id = d.department_id " +
+            "JOIN fund f ON l.fund_id = f.fund_id " +
+            "WHERE (:year IS NULL OR YEAR(l.general_ledger_date) = :year) " +
+            "GROUP BY d.department_name", nativeQuery = true)
+    List<DepartmentFinancialProjection> findDepartmentFinancialDataByYear(@Param("year") Integer year);
+
+    @Query(value = "SELECT " +
+            "f.fund_description AS fundDescription, " +
+            "SUM(CASE WHEN l.ledger_description = 'Revenues' THEN l.amount ELSE 0 END) AS revenue, " +
+            "SUM(CASE WHEN l.ledger_description = 'Expenses' THEN l.amount ELSE 0 END) AS expenses " +
+            "FROM ledger l " +
+            "JOIN department d ON l.department_id = d.department_id " +
+            "JOIN fund f ON l.fund_id = f.fund_id " +
+            "WHERE (:department_name_key IS NULL OR d.department_name_key = :department_name_key) " +
+            "AND (:year IS NULL OR YEAR(l.general_ledger_date) = :year) " +
+            "GROUP BY f.fund_description", nativeQuery = true)
+    List<FundFinancialProjection> findFundDescriptionFinancialDataByDepartmentAndYear(
+            @Param("department_name_key") String departmentNameKey,
+            @Param("year") Integer year
     );
 
 }

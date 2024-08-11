@@ -105,7 +105,6 @@ paths:
                   type: object
                   additionalProperties:
                     type: number
-                    format: decimal
                   description: A map where the key is the department name and the value is the expense amount
                   example: >
                     Project Fund 2018 Bond: 32.45,
@@ -145,88 +144,63 @@ paths:
                   type: object
                   additionalProperties:
                     type: number
-                    format: decimal
                   description: A map where the key is the department name and the value is the expense amount
                   example: >
                     Revenue: 35.31,
                     Expenses: 64.69
 
-  /get-department-revenue-and-expenses-breakdown:
-    post:
+  /get-financial-table-data:
+    get:
       tags:
         - Analytics
-      operationId: getDepartmentRevenueAndExpensesBreakdown
-      summary: TO WRITE LATER.
+      operationId: getFinancialTableData
+      summary: Used to populate the data for the financial table
       description: >
-        WRITE LATER.
-      requestBody:
-        description: A JSON array of timeline items
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/AnalyticsEnquiryModel'
+        This API is used to populate the data for the financial table based on the year and the department selected
+      parameters:
+        - name: year
+          in: query
+          description: Field to filter financial table data by year
+          schema:
+            type: integer
+            format: date
+            example: "2012"
+        - name: departmentNameKey
+          in: query
+          description: Department name key to filter the financial table data
+          schema:
+            type: string
+            example: "Finance"
       responses:
         '200':
-          description: A JSON array of timeline items
+          description: A JSON array of Financial Table Items
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TimelineItem' # this one have to modify, discuss together tomorrow
-
-  /get-fund-description-revenue-and-expenses-breakdown:
-    post:
-      tags:
-        - Analytics
-      operationId: getFundDescriptionRevenueAndExpensesBreakdown
-      summary: TO WRITE LATER.
-      description: >
-        WRITE LATER.
-      requestBody:
-        description: A JSON array of timeline items
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/AnalyticsEnquiryModel'
-      responses:
-        '200':
-          description: A JSON array of timeline items
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TimelineItem' # this one have to modify, discuss together tomorrow
+                  $ref: '#/components/schemas/FinancialTableItem'
 
 components:
   schemas:
-    AnalyticsEnquiryModel:
+    FinancialTableItem:
       type: object
-      description: Model used to enquire/request for data based on defined filters and fields
+      description: Model that contains the financial table data based that could be filtered by year and departmentNameKey
       properties:
-        topNRanks:
+        description:
+          type: string
+          description: > 
+            The description of the financial data table. It could be the department_name OR 
+            the fund_description (filtered by departmentNameKey)
+          example: "[City Clerk, Department of Public Safety - Police, Drug Abuse Resistance Education Trust Fund, Code Trust Fund]"
+        revenue:
           type: number
-          description: The top N ranks to return
-          example: "5"
-        dateFrom:
-          type: string
-          format: date
-          description: Starting date of filter
-          example: "2024-08-10T14:48:00Z"
-        dateTo:
-          type: string
-          format: date
-          description: Ending date of filter
-          example: "2024-08-30T14:48:00Z"
-        department:
-          type: string
-          description: Variable used for filtering based on departments
-          example: "Police DepartmentBean"
+          description: Reflects the revenue that is grouped by the department OR fund_description
+          example: "37331000"
+        expenses:
+          type: number
+          description: Reflects the expenses that is grouped by the department OR fund_description
+          example: "500323140"
 
     TimelineResponseModel:
       type: object
