@@ -1,0 +1,181 @@
+name: CI Workflow
+
+on:
+  push:
+    branches: [ "main" ]
+    tags:
+      - 'V*'
+  pull_request:
+    branches: [ "main" ]
+    tags:
+      - 'V*'
+
+jobs:
+  gradle-build:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:9.0.1
+        env:
+          MYSQL_DATABASE: revex_insights
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: --health-cmd "mysqladmin ping -h localhost" --health-interval 10s --health-timeout 5s --health-retries 3
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@dbbdc275be76ac10734476cc723d82dfe7ec6eda # v3.4.2
+      with:
+        build-root-directory: backend  # Specify the backend directory as the build root
+
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+      working-directory: backend  # Ensure this is run in the correct directory
+
+    - name: Build with Gradle Wrapper
+      run: ./gradlew build
+      working-directory: backend  # Run the build command from the correct backend directory
+
+  gradle-dependency-submission:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Generate and submit dependency graph
+      uses: gradle/actions/dependency-submission@dbbdc275be76ac10734476cc723d82dfe7ec6eda # v3.4.2
+      with:
+        build-root-directory: backend  # Specify the backend directory as the build root
+
+  # node-build:
+  #   runs-on: ubuntu-latest
+
+  #   strategy:
+  #     matrix:
+  #       node-version: [20.x, 22.x]
+  #       # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+  #   steps:
+  #   - uses: actions/checkout@v4
+
+  #   - name: Set up Node.js
+  #     uses: actions/setup-node@v4
+  #     with:
+  #       node-version: ${{ matrix.node-version }}
+  #       cache: 'npm'
+  #       cache-dependency-path: 'Frontend/react-chartjs-app/package-lock.json' # THIS PATTERN did the trick for me.
+
+  #   - name: Install dependencies
+  #     run: |
+  #       cd ./Frontend/react-chartjs-app
+  #       npm ci
+
+  #   - name: Build the project
+  #     run: |
+  #       cd ./Frontend/react-chartjs-app
+  #       npm run build --if-present
+
+  #   - name: Run tests
+  #     run: |
+  #       cd ./Frontend/react-chartjs-app
+  #       npm test
+
+ # docker-compose:
+  #  runs-on: ubuntu-latest
+
+  #  steps:
+   # - name: Checkout
+   #   uses: actions/checkout@v4
+
+  #  - name: Set up QEMU
+ #     uses: docker/setup-qemu-action@v3
+#
+ #   - name: Set up Docker Buildx
+ #     uses: docker/setup-buildx-action@v3
+#
+ #   - name: Install Docker Compose
+ #     run: sudo apt-get install docker-compose
+
+ #   - name: Build and Spin up Docker Compose
+ #     run: docker-compose up -d --build
+
+#    - name: Wait for services to be ready
+#      run: |
+#        # Wait for MySQL to be ready
+#        until docker exec dockerized_mysql mysqladmin ping --silent; do
+ #         echo "Waiting for MySQL...";
+ #         sleep 3;
+ #       done
+#
+#        # Optionally wait for backend to be ready by checking the port
+#        until curl -s http://localhost:8080/actuator/health | grep 'UP'; do
+#          echo "Waiting for Backend...";
+ #         docker logs dockerized_backend  # Print logs to see what's happening
+ #         sleep 3;
+ #       done
+
+ #   - name: Run Health Checks
+ #     run: |
+ #       # Replace with your actual health check logic for frontend
+ #       curl --fail http://localhost || exit 1
+#
+ #   - name: Rollback if Health Checks Fail
+#      if: failure()
+#      run: |
+ #       echo "Health check failed, rolling back to the previous version"
+#        docker-compose down
+ #       docker-compose -f docker-compose.previous.yml up -d  # Replace with your rollback command
+
+  docker:
+      needs: gradle-build
+      runs-on: ubuntu-latest
+      
+      steps:
+        - name: Set up QEMU
+          uses: docker/setup-qemu-action@v3
+          
+        - name: Set up Docker Buildx
+          uses: docker/setup-buildx-action@v3
+          
+        - name: docker login
+          uses: docker/login-action@v3
+          with:
+            username: ${{ secrets.DOCKER_USER }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
+            
+        - name: Build and push Frontend
+          uses: docker/build-push-action@v6
+          
+          with:
+            context: "{{defaultContext}}:Frontend/react-chartjs-app"
+            push: true
+            tags: mathavan2711/frontend:${{ github.ref_name}}
+
+        - name: Build and push Backend
+          uses: docker/build-push-action@v6
+          
+          with:
+            context: "{{defaultContext}}:backend"
+            push: true
+            tags: mathavan2711/backend:${{ github.ref_name}}
