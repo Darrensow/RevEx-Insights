@@ -1,14 +1,14 @@
 package com.revex.backend.api;
 
 import com.revex.backend.model.TimelineResponseModel;
-import com.revex.backend.service.DepartmentService;
-import com.revex.backend.service.LedgerService;
+import com.revex.backend.service.AnalyticsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -18,8 +18,7 @@ import java.util.Map;
 @RequestMapping("/analytics")
 public class AnalyticsController implements AnalyticsApi {
 
-    private final LedgerService ledgerService;
-    private final DepartmentService departmentService;
+    private final AnalyticsService analyticsService;
 
     @GetMapping("/get-timeline-data")
     public ResponseEntity<TimelineResponseModel> getTimelineData(
@@ -33,7 +32,7 @@ public class AnalyticsController implements AnalyticsApi {
         log.info(logPrefix + " period : {}", period);
         log.info(logPrefix + " department : {}", departmentNameKey);
 
-        TimelineResponseModel timelineResponseModel =  ledgerService.getTimelineResponseModel(period, year, departmentNameKey);
+        TimelineResponseModel timelineResponseModel =  analyticsService.getTimelineResponseModel(period, year, departmentNameKey);
 
         return new ResponseEntity<>(timelineResponseModel, HttpStatus.OK);
     }
@@ -41,9 +40,36 @@ public class AnalyticsController implements AnalyticsApi {
     @Override
     @GetMapping("/initiate-analytics-dashboard")
     public ResponseEntity<List<Map<String, String>>> initiateAnalyticsDashboard() {
+
         String logPrefix = "initiateAnalyticsDashboard";
-        List<Map<String, String>> departmentNamesAndKeysMap = departmentService.getDepartmentNamesAndKeysAsMap();
+
+        List<Map<String, String>> departmentNamesAndKeysMap = analyticsService.getDepartmentNamesAndKeysAsMap();
         log.info(logPrefix + " departmentNamesAndKeysMap : {}", departmentNamesAndKeysMap);
+
         return new ResponseEntity<>(departmentNamesAndKeysMap, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<Map<String, BigDecimal>>> getExpensesBreakdown(Integer year, String departmentNameKey) {
+
+        String logPrefix = "[AnalyticsController] getExpensesBreakdown";
+
+        List<Map<String, BigDecimal>> expensesBreakdown = analyticsService.getExpensesBreakdown(year, departmentNameKey);
+        log.info("{} expensesBreakdown: {}", logPrefix, expensesBreakdown);
+
+        return new ResponseEntity<>(expensesBreakdown, HttpStatus.OK);
+
+    }
+
+    @Override
+    public ResponseEntity<List<Map<String, BigDecimal>>> getRevenueAndExpensesBreakdown(Integer year, String departmentNameKey) {
+
+        String logPrefix = "[AnalyticsController] getRevenueAndExpensesBreakdown";
+
+        List<Map<String, BigDecimal>> revenueAndExpensesBreakdown = analyticsService.getRevenueAndExpensesBreakdown(year, departmentNameKey);
+        log.info("{} revenueAndExpensesBreakdown: {}", logPrefix, revenueAndExpensesBreakdown);
+
+        return new ResponseEntity<>(revenueAndExpensesBreakdown, HttpStatus.OK);
+
     }
 }
