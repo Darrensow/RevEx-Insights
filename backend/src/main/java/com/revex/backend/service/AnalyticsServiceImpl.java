@@ -3,7 +3,9 @@ package com.revex.backend.service;
 import com.revex.backend.model.TimelineItem;
 import com.revex.backend.model.TimelineResponseModel;
 import com.revex.backend.model.entity.LedgerBean;
+import com.revex.backend.model.projection.DepartmentProjection;
 import com.revex.backend.model.projection.TimelineItemProjection;
+import com.revex.backend.model.repository.DepartmentRepository;
 import com.revex.backend.model.repository.LedgerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,13 +16,30 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class LedgerServiceImpl implements LedgerService {
+public class AnalyticsServiceImpl implements AnalyticsService {
 
+    private final DepartmentRepository departmentRepository;
     private final LedgerRepository ledgerRepository;
+
+    @Override
+    public List<Map<String, String>> getDepartmentNamesAndKeysAsMap() {
+        String logPrefix = "getDepartmentNamesAndKeysAsMap";
+        List<DepartmentProjection> projections = departmentRepository.findAllProjectedBy();
+
+        // Map the projection results to a List<Map<String, String>>
+        List<Map<String, String>> departmentNamesAndKeysMap = projections.stream()
+                .map(projection -> Map.of(projection.getDepartmentName(), projection.getDepartmentNameKey()))
+                .collect(Collectors.toList());
+
+        log.info(logPrefix + "departmentNamesAndKeysMap : {}", departmentNamesAndKeysMap);
+
+        return departmentNamesAndKeysMap;
+    }
 
     public TimelineResponseModel getTimelineResponseModel(String period, Integer year, String departmentNameKey) {
         String logPrefix = "getTimelineResponseModel";
@@ -28,17 +47,10 @@ public class LedgerServiceImpl implements LedgerService {
         List<TimelineItemProjection> revenueTimelineProjections = ledgerRepository.findLedgerSummariesByYearAndPeriodAndDescription(period, year, departmentNameKey, LedgerBean.LedgerDescriptionType.REVENUES.getDescription());
         List<TimelineItemProjection> expensesTimelineProjections = ledgerRepository.findLedgerSummariesByYearAndPeriodAndDescription(period, year, departmentNameKey, LedgerBean.LedgerDescriptionType.EXPENSES.getDescription());
 
-        log.info(logPrefix + "revenueTimelineProjections : {}", revenueTimelineProjections);
-        log.info(logPrefix + "expensesTimelineProjections : {}", expensesTimelineProjections);
-
         List<TimelineItem> revenueTimeline = mapToTimelineItems(revenueTimelineProjections);
         List<TimelineItem> expensesTimeline = mapToTimelineItems(expensesTimelineProjections);
 
-        log.info(logPrefix + "revenueTimeline : {}", revenueTimeline);
-        log.info(logPrefix + "expensesTimeline : {}", expensesTimeline);
-
         List<TimelineItem> surplusDeficitTimeline = calculateSurplusDeficit(revenueTimeline, expensesTimeline);
-        log.info(logPrefix + "surplusDeficitTimeline : {}", surplusDeficitTimeline);
 
         TimelineResponseModel responseModel = new TimelineResponseModel();
         responseModel.setRevenueTimeline(revenueTimeline);
@@ -49,6 +61,18 @@ public class LedgerServiceImpl implements LedgerService {
 
         return responseModel;
     }
+
+    @Override
+    public List<Map<String, BigDecimal>> getExpensesBreakdown(Integer year, String departmentNameKey) {
+        return null;
+    }
+
+    @Override
+    public List<Map<String, BigDecimal>> getRevenueAndExpensesBreakdown(Integer year, String departmentNameKey) {
+        return null;
+    }
+
+    //////////////////////////////////////////  BELOW ARE HELPER FUNCTIONS  ///////////////////////////////////////////
 
     private List<TimelineItem> mapToTimelineItems(List<TimelineItemProjection> projections) {
         List<TimelineItem> timelineItems = new ArrayList<>();
@@ -86,5 +110,4 @@ public class LedgerServiceImpl implements LedgerService {
 
         return surplusDeficitTimeline;
     }
-
 }
