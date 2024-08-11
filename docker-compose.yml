@@ -1,0 +1,52 @@
+services:
+  mysql:
+    image: mysql:9.0.1
+    container_name: dockerized_mysql
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=revex_insights
+    volumes:
+      - type: volume
+        source: mysql-data
+        target: /var/lib/mysql
+    networks:
+      - localnet
+
+  frontend:
+    depends_on:
+      - backend
+    container_name: dockerized_frontend
+    restart: always
+    build:
+      context: ./Frontend/react-chartjs-app
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    networks:
+      - localnet
+
+  backend:
+    restart: always
+    container_name: dockerized_backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASSWORD=password
+      - DB_DATABASE=revex_insights
+    ports:
+      - "8080:8080"
+    networks:
+      - localnet
+
+volumes:
+  mysql-data:
+
+networks:
+  localnet:
+    driver: bridge
