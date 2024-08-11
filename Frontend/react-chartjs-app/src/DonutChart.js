@@ -6,11 +6,11 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const DonutChart = () => {
     const data = {
-        labels: ['Red', 'Blue'],
+        labels: ['Revenue', 'Expense'],
         datasets: [
             {
-                label: '# of Votes',
-                data: [12, 19],
+                label: 'Amount Spent (USD)',
+                data: [4000000, 6000000],
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.6)',
                     'rgba(54, 162, 235, 0.6)',

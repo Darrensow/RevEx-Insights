@@ -6,10 +6,10 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const PieChart = () => {
     const data = {
-        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple'],
+        labels: ['General Fund', 'Debt', 'Project Fund', 'Grants', 'Hospital Fee'],
         datasets: [
             {
-                label: '# of Votes',
+                label: 'Expense Type',
                 data: [12, 19, 3, 5, 2],
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.6)',

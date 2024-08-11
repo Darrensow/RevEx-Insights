@@ -27,6 +27,7 @@
   padding: 20px;
 }
 
+
 .date-picker, .department-filter {
   padding: 8px;
   border: 1px solid #ddd;
@@ -37,6 +38,37 @@
 
 .date-picker:hover, .department-filter:hover {
   background-color: #e2e2e2;
+}
+
+.department-filter {
+  padding: 10px 15px;  /* Increased padding for better appearance */
+  border: 2px solid #ccc;  /* Slightly thicker border for better definition */
+  border-radius: 8px;  /* More rounded corners for a modern look */
+  background-color: #ffffff;  /* White background for a clean look */
+  color: #333;  /* Darker text color for better readability */
+  font-size: 16px;  /* Slightly larger font size */
+  transition: all 0.3s ease;  /* Smooth transition for interactions */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* Subtle shadow for depth */
+}
+
+/* Hover effect */
+.department-filter:hover {
+  background-color: #f7f7f7;  /* Slightly lighter background on hover */
+  border-color: #007bff;  /* Change border color on hover */
+}
+
+/* Focus effect */
+.department-filter:focus {
+  outline: none;  /* Remove default focus outline */
+  border-color: #007bff;  /* Blue border on focus */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);  /* Blue glow on focus */
+}
+
+/* Aligning the department filter with the calendar and buttons */
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 20px;  /* Increase spacing between elements */
 }
 
 .chart-container {
