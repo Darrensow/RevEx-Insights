@@ -1,64 +1,106 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Pie } from 'react-chartjs-2';
+import axios from 'axios';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 const PieChart = ({ viewMode, selectedDepartment, selectedYear }) => {
-    const dataSets = {
-        yearly: {
-            default: [30, 20, 15, 25, 10],
-            CityCouncil: [35, 25, 10, 20, 10],
-            Marketing: [40, 15, 20, 15, 10],
-            Engineering: [25, 30, 15, 20, 10],
-            HR: [20, 25, 20, 25, 10],
-        },
-        quarterly: {
-            default: [25, 22, 18, 20, 15],
-            CityCouncil: [30, 20, 15, 25, 10],
-            Marketing: [35, 15, 20, 20, 10],
-            Engineering: [20, 25, 20, 20, 15],
-            HR: [15, 30, 20, 20, 15],
-        },
-        monthly: {
-            default: [28, 18, 12, 30, 12],
-            CityCouncil: [32, 22, 14, 26, 16],
-            Marketing: [37, 15, 15, 23, 10],
-            Engineering: [23, 28, 17, 25, 7],
-            HR: [18, 33, 20, 19, 10],
-        },
-    };
+    const [chartData, setChartData] = useState({
+        labels: [],
+        datasets: [],
+    });
 
-    const selectedData = dataSets[viewMode][selectedDepartment] || dataSets[viewMode].default;
+    const [fullLabels, setFullLabels] = useState([]);
 
-    const data = {
-        labels: ['General Fund', 'Debt', 'Project Fund', 'Grants', 'Hospital Fee'],
-        datasets: [
-            {
-                label: `${viewMode.charAt(0).toUpperCase() + viewMode.slice(1)} Expense Breakdown`,
-                data: selectedData,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(255, 206, 86, 0.6)',
-                    'rgba(75, 192, 192, 0.6)',
-                    'rgba(153, 102, 255, 0.6)',
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                ],
-                borderWidth: 1,
-            },
-        ],
-    };
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const params = {};
+
+                if (selectedDepartment) params.departmentNameKey = selectedDepartment;
+                if (selectedYear) params.year = selectedYear;
+
+                const response = await axios.get('http://localhost:8080/analytics/get-expenses-breakdown', { params });
+
+                const expenseData = response.data;
+
+                // Sort the data to get the top 5 expenses
+                const sortedData = expenseData.sort((a, b) => Object.values(b)[0] - Object.values(a)[0]).slice(0, 5);
+
+                const labels = sortedData.map(item => {
+                    const label = Object.keys(item)[0];
+                    return label.split(' ').map(word => word.charAt(0)).join('');
+                });
+
+                const fullLabels = sortedData.map(item => Object.keys(item)[0]);
+                const data = sortedData.map(item => Object.values(item)[0]);
+
+                setChartData({
+                    labels,
+                    datasets: [
+                        {
+                            label: `${viewMode.charAt(0).toUpperCase() + viewMode.slice(1)} Expense Breakdown`,
+                            data,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.6)',
+                                'rgba(54, 162, 235, 0.6)',
+                                'rgba(255, 206, 86, 0.6)',
+                                'rgba(75, 192, 192, 0.6)',
+                                'rgba(153, 102, 255, 0.6)',
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                            ],
+                            borderWidth: 1,
+                        },
+                    ],
+                });
+
+                setFullLabels(fullLabels); // Save full labels for tooltips
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    }, [viewMode, selectedDepartment, selectedYear]);
 
     const options = {
         plugins: {
+            legend: {
+                labels: {
+                    generateLabels: function (chart) {
+                        return chart.data.labels.map((label, index) => {
+                            return {
+                                text: label,
+                                fillStyle: chart.data.datasets[0].backgroundColor[index],
+                                hidden: !chart.data.datasets[0].data[index],
+                                lineCap: 'butt',
+                                lineDash: [],
+                                lineDashOffset: 0,
+                                lineJoin: 'miter',
+                                strokeStyle: chart.data.datasets[0].borderColor[index],
+                                pointStyle: 'rect',
+                                rotation: 0
+                            };
+                        });
+                    }
+                },
+            },
+            tooltip: {
+                callbacks: {
+                    label: function (tooltipItem) {
+                        const labelIndex = tooltipItem.dataIndex;
+                        return `${fullLabels[labelIndex]}: ${tooltipItem.raw}`;
+                    }
+                }
+            },
             datalabels: {
                 formatter: (value, context) => {
                     const total = context.chart._metasets[0].total;
@@ -74,16 +116,13 @@ const PieChart = ({ viewMode, selectedDepartment, selectedYear }) => {
         },
     };
 
-    // return <Pie data={data} options={options} />;
-
-    const chartTitle = selectedYear ? `Breakdown of Expense ${selectedYear}` : 'Breakdown of Expense';
-
+    const chartTitle = selectedYear ? `Breakdown of Expense` : 'Breakdown of Expense';
 
     return (
         <div>
             <p className='LineText'>{chartTitle}</p>
             <hr />
-            <Pie data={data} options={options} />;
+            <Pie data={chartData} options={options} />
         </div>
     );
 };

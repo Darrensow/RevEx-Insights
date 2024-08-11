@@ -1,55 +1,65 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Doughnut } from 'react-chartjs-2';
+import axios from 'axios';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
-const DonutChart = ({ viewMode, selectedDepartment }) => {
-    const dataSets = {
-        yearly: {
-            default: [70, 30],
-            CityCouncil: [65, 35],
-            Marketing: [60, 40],
-            Engineering: [75, 25],
-            HR: [80, 20],
-        },
-        quarterly: {
-            default: [68, 32],
-            CityCouncil: [63, 37],
-            Marketing: [58, 42],
-            Engineering: [73, 27],
-            HR: [78, 22],
-        },
-        monthly: {
-            default: [67, 33],
-            CityCouncil: [62, 38],
-            Marketing: [57, 43],
-            Engineering: [72, 28],
-            HR: [77, 23],
-        },
-    };
-
-    const selectedData = dataSets[viewMode][selectedDepartment] || dataSets[viewMode].default;
-
-    const data = {
+const DonutChart = ({ viewMode, selectedYear, selectedDepartment }) => {
+    const [chartData, setChartData] = useState({
         labels: ['Revenue', 'Expense'],
-        datasets: [
-            {
-                label: `${viewMode.charAt(0).toUpperCase() + viewMode.slice(1)} Revenue vs Expense`,
-                data: selectedData,
-                backgroundColor: [
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(255, 99, 132, 0.6)',
-                ],
-                borderColor: [
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 99, 132, 1)',
-                ],
-                borderWidth: 1,
-            },
-        ],
-    };
+        datasets: [],
+    });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const params = {};
+
+                if (selectedDepartment) params.departmentNameKey = selectedDepartment;
+                if (selectedYear) params.year = selectedYear;
+
+                // Fetch data from the API
+                const response = await axios.get('http://localhost:8080/analytics/get-revenue-and-expenses-breakdown', { params });
+
+                const data = response.data;
+                let revenue = 0;
+                let expense = 0;
+
+                data.forEach(item => {
+                    if (item.Revenues) {
+                        revenue = item.Revenues;
+                    } else if (item.Expenses) {
+                        expense = item.Expenses;
+                    }
+                });
+
+                setChartData({
+                    labels: ['Revenue', 'Expense'],
+                    datasets: [
+                        {
+                            label: `${viewMode.charAt(0).toUpperCase() + viewMode.slice(1)} Revenue vs Expense`,
+                            data: [revenue, expense],
+                            backgroundColor: [
+                                'rgba(54, 162, 235, 0.6)',
+                                'rgba(255, 99, 132, 0.6)',
+                            ],
+                            borderColor: [
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 99, 132, 1)',
+                            ],
+                            borderWidth: 1,
+                        },
+                    ],
+                });
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    }, [selectedYear, selectedDepartment, viewMode]);  // Add viewMode to dependency array
 
     const options = {
         plugins: {
@@ -66,9 +76,12 @@ const DonutChart = ({ viewMode, selectedDepartment }) => {
                 },
             },
         },
+        animation: {
+            duration: viewMode ? 1000 : 0,  // 0 duration when viewMode changes to disable animation
+        },
     };
 
-    return <Doughnut data={data} options={options} />;
+    return <Doughnut data={chartData} options={options} />;
 };
 
 export default DonutChart;
