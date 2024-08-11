@@ -1,16 +1,15 @@
 package com.revex.backend.service;
 
+import com.revex.backend.model.FinancialTableItem;
 import com.revex.backend.model.TimelineItem;
 import com.revex.backend.model.TimelineResponseModel;
 import com.revex.backend.model.entity.LedgerBean;
-import com.revex.backend.model.projection.DepartmentProjection;
-import com.revex.backend.model.projection.ExpensesBreakdownProjection;
-import com.revex.backend.model.projection.RevenueAndExpensesBreakdownProjection;
-import com.revex.backend.model.projection.TimelineItemProjection;
+import com.revex.backend.model.projection.*;
 import com.revex.backend.model.repository.DepartmentRepository;
 import com.revex.backend.model.repository.LedgerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -94,6 +93,44 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         log.info(logPrefix + "revenueAndExpensesBreakdownModel : {}", revenueAndExpensesBreakdownModel);
 
         return revenueAndExpensesBreakdownModel;
+    }
+
+    @Override
+    public List<FinancialTableItem> getFinancialTableData(Integer year, String departmentNameKey) {
+        String logPrefix = "getFinancialTableData";
+
+        List<FinancialTableItem> financialTableItems;
+
+        if (StringUtils.isNotEmpty(departmentNameKey)) {
+            // Use query 2
+            List<FundFinancialProjection> fundData = ledgerRepository.findFundDescriptionFinancialDataByDepartmentAndYear(departmentNameKey, year);
+            financialTableItems = fundData.stream()
+                    .map(projection -> {
+                        FinancialTableItem item = new FinancialTableItem();
+                        item.setDescription(projection.getFundDescription());
+                        item.setRevenue(projection.getRevenue());
+                        item.setExpenses(projection.getExpenses());
+                        return item;
+                    })
+                    .collect(Collectors.toList());
+        } else {
+            // Use query 1
+            List<DepartmentFinancialProjection> departmentData = ledgerRepository.findDepartmentFinancialDataByYear(year);
+            financialTableItems = departmentData.stream()
+                    .map(projection -> {
+                        FinancialTableItem item = new FinancialTableItem();
+                        item.setDescription(projection.getDepartmentName());
+                        item.setRevenue(projection.getRevenue());
+                        item.setExpenses(projection.getExpenses());
+                        return item;
+                    })
+                    .collect(Collectors.toList());
+        }
+
+
+        log.info("{} financialTableItems: {}", logPrefix, financialTableItems);
+
+        return financialTableItems;
     }
 
     //////////////////////////////////////////  BELOW ARE HELPER FUNCTIONS  ///////////////////////////////////////////

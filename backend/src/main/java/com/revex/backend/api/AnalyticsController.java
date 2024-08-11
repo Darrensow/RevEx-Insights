@@ -1,5 +1,6 @@
 package com.revex.backend.api;
 
+import com.revex.backend.model.FinancialTableItem;
 import com.revex.backend.model.TimelineResponseModel;
 import com.revex.backend.service.AnalyticsService;
 import lombok.RequiredArgsConstructor;
@@ -71,5 +72,16 @@ public class AnalyticsController implements AnalyticsApi {
 
         return new ResponseEntity<>(revenueAndExpensesBreakdown, HttpStatus.OK);
 
+    }
+
+    @Override
+    public ResponseEntity<List<FinancialTableItem>> getFinancialTableData(Integer year, String departmentNameKey) {
+        String logPrefix = "getFinancialTableData";
+
+        List<FinancialTableItem> financialTableItems = analyticsService.getFinancialTableData(year, departmentNameKey);
+
+        log.info("{} financialTableItems: {}", logPrefix, financialTableItems);
+
+        return new ResponseEntity<>(financialTableItems, HttpStatus.OK);
     }
 }

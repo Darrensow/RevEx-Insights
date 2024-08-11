@@ -1,5 +1,6 @@
 package com.revex.backend.service;
 
+import com.revex.backend.model.FinancialTableItem;
 import com.revex.backend.model.TimelineResponseModel;
 
 import java.math.BigDecimal;
@@ -11,4 +12,5 @@ public interface AnalyticsService {
     TimelineResponseModel getTimelineResponseModel(String period, Integer year, String departmentNameKey);
     List<Map<String, BigDecimal>> getExpensesBreakdown(Integer year, String departmentNameKey);
     List<Map<String, BigDecimal>> getRevenueAndExpensesBreakdown(Integer year, String departmentNameKey);
+    List<FinancialTableItem> getFinancialTableData(Integer year, String departmentNameKey);
 }
