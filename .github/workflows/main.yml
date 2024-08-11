@@ -101,53 +101,54 @@ jobs:
   #       cd ./Frontend/react-chartjs-app
   #       npm test
 
-  docker-compose:
-    runs-on: ubuntu-latest
+ # docker-compose:
+  #  runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+  #  steps:
+   # - name: Checkout
+   #   uses: actions/checkout@v4
 
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
+  #  - name: Set up QEMU
+ #     uses: docker/setup-qemu-action@v3
+#
+ #   - name: Set up Docker Buildx
+ #     uses: docker/setup-buildx-action@v3
+#
+ #   - name: Install Docker Compose
+ #     run: sudo apt-get install docker-compose
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+ #   - name: Build and Spin up Docker Compose
+ #     run: docker-compose up -d --build
 
-    - name: Install Docker Compose
-      run: sudo apt-get install docker-compose
+#    - name: Wait for services to be ready
+#      run: |
+#        # Wait for MySQL to be ready
+#        until docker exec dockerized_mysql mysqladmin ping --silent; do
+ #         echo "Waiting for MySQL...";
+ #         sleep 3;
+ #       done
+#
+#        # Optionally wait for backend to be ready by checking the port
+#        until curl -s http://localhost:8080/actuator/health | grep 'UP'; do
+#          echo "Waiting for Backend...";
+ #         docker logs dockerized_backend  # Print logs to see what's happening
+ #         sleep 3;
+ #       done
 
-    - name: Build and Spin up Docker Compose
-      run: docker-compose up -d --build
-
-    - name: Wait for services to be ready
-      run: |
-        # Wait for MySQL to be ready
-        until docker exec dockerized_mysql mysqladmin ping --silent; do
-          echo "Waiting for MySQL...";
-          sleep 3;
-        done
-
-        # Optionally wait for backend to be ready by checking the port
-        until curl -s http://localhost:8080/actuator/health | grep 'UP'; do
-          echo "Waiting for Backend...";
-          docker logs dockerized_backend  # Print logs to see what's happening
-          sleep 3;
-        done
-
-    - name: Run Health Checks
-      run: |
-        # Replace with your actual health check logic for frontend
-        curl --fail http://localhost || exit 1
-
-    - name: Rollback if Health Checks Fail
-      if: failure()
-      run: |
-        echo "Health check failed, rolling back to the previous version"
-        docker-compose down
-        docker-compose -f docker-compose.previous.yml up -d  # Replace with your rollback command
+ #   - name: Run Health Checks
+ #     run: |
+ #       # Replace with your actual health check logic for frontend
+ #       curl --fail http://localhost || exit 1
+#
+ #   - name: Rollback if Health Checks Fail
+#      if: failure()
+#      run: |
+ #       echo "Health check failed, rolling back to the previous version"
+#        docker-compose down
+ #       docker-compose -f docker-compose.previous.yml up -d  # Replace with your rollback command
 
   docker:
+      needs: gradle-build
       runs-on: ubuntu-latest
       
       steps:
