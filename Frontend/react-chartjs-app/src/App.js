@@ -45,6 +45,15 @@ function App() {
     setSelectedYear(year);
   };
 
+  // Handle setting view mode to yearly and reset selectedYear and dates if viewMode is 'yearly'
+  const handleViewModeChange = (mode) => {
+    if (mode === 'yearly') {
+      setSelectedYear(null);  // Reset the selectedYear to null
+      setDates(null);  // Reset the calendar input to null
+    }
+    setViewMode(mode);
+  };
+
   return (
     <div className="App">
       <header className="header">
@@ -70,21 +79,19 @@ function App() {
             placeholder="Select Year"
           />
           <div className="chart-view-buttons">
-            {!dates && (
-              <Button
-                label="Yearly"
-                onClick={() => setViewMode('yearly')}
-                className="p-button-outlined p-mr-2"
-              />
-            )}
+            <Button
+              label="Yearly"
+              onClick={() => handleViewModeChange('yearly')}
+              className="p-button-outlined p-mr-2"
+            />
             <Button
               label="Quarterly"
-              onClick={() => setViewMode('quarterly')}
+              onClick={() => handleViewModeChange('quarterly')}
               className="p-button-outlined p-mr-2"
             />
             <Button
               label="Monthly"
-              onClick={() => setViewMode('monthly')}
+              onClick={() => handleViewModeChange('monthly')}
               className="p-button-outlined"
             />
           </div>
