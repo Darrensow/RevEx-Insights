@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import BarChart from './BarChart';
 import LineChart from './LineChart';
@@ -8,6 +8,7 @@ import { Calendar } from 'primereact/calendar';
 import DataTableComponent from './DataTableComponent';
 import DepartmentTableComponent from './DepartmentTableComponent'; // Import the new component
 import { Button } from 'primereact/button';
+import axios from 'axios';
 
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
@@ -19,29 +20,44 @@ function App() {
   const [viewMode, setViewMode] = useState('yearly');
   const [selectedYear, setSelectedYear] = useState(null);
   const [selectedDepartment, setSelectedDepartment] = useState('');
+  const [departments, setDepartments] = useState([]);
 
   const maxDate = new Date(2020, 11, 31);
   const minDate = new Date(2012, 1, 1);
 
   const initialViewDate = new Date(2020, 11, 1);
 
-  const selectLast60Days = () => {
-    const endDate = maxDate;
-    const startDate = new Date(endDate);
-    startDate.setDate(endDate.getDate() - 60);
-    setDates([startDate, endDate]);
-  };
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/analytics/initiate-analytics-dashboard');
+        const departmentData = response.data;
 
-  const selectLast90Days = () => {
-    const endDate = maxDate;
-    const startDate = new Date(endDate);
-    startDate.setDate(endDate.getDate() - 90);
-    setDates([startDate, endDate]);
-  };
+        // Transform the department data into an array of objects with label and value properties
+        const departmentOptions = departmentData.map(department => {
+          const label = Object.keys(department)[0];
+          const value = department[label];
+          return { label, value };
+        });
+
+        setDepartments(departmentOptions);
+      } catch (error) {
+        console.error('Error fetching departments:', error);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
 
   // Handle year selection
   const handleYearChange = (e) => {
     const year = e.value ? e.value.getFullYear() : null;
+
+    if (selectedDepartment && viewMode === 'yearly') {
+      alert('Year selection is disabled when a department is chosen in "Yearly" mode. Please select a different View Mode or clear the department.');
+      return; // Prevent the year from being set
+    }
+
     setSelectedYear(year);
   };
 
@@ -61,7 +77,7 @@ function App() {
           RexEx Insights
         </div>
         <div className="filters">
-          <p className='filter'>Date Range</p>
+          <p className='filter'>Choose Year :</p>
           <Calendar
             value={dates}
             onChange={(e) => {
@@ -95,17 +111,16 @@ function App() {
               className="p-button-outlined"
             />
           </div>
-          <p className='DeptFilter'>Select Department</p>
+          <p className='DeptFilter'>Select Department :</p>
           <select
             className="department-filter"
             value={selectedDepartment}
             onChange={(e) => setSelectedDepartment(e.target.value)}
           >
             <option value="">All Departments</option>
-            <option value="Sales">Sales</option>
-            <option value="Marketing">Marketing</option>
-            <option value="Engineering">Engineering</option>
-            <option value="HR">HR</option>
+            {departments.map((dept) => (
+              <option key={dept.value} value={dept.value}>{dept.label}</option>
+            ))}
           </select>
         </div>
       </header>

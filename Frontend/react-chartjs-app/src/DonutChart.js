@@ -9,21 +9,21 @@ const DonutChart = ({ viewMode, selectedDepartment }) => {
     const dataSets = {
         yearly: {
             default: [70, 30],
-            Sales: [65, 35],
+            CityCouncil: [65, 35],
             Marketing: [60, 40],
             Engineering: [75, 25],
             HR: [80, 20],
         },
         quarterly: {
             default: [68, 32],
-            Sales: [63, 37],
+            CityCouncil: [63, 37],
             Marketing: [58, 42],
             Engineering: [73, 27],
             HR: [78, 22],
         },
         monthly: {
             default: [67, 33],
-            Sales: [62, 38],
+            CityCouncil: [62, 38],
             Marketing: [57, 43],
             Engineering: [72, 28],
             HR: [77, 23],

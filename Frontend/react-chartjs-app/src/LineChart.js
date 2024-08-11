@@ -15,50 +15,34 @@ const LineChart = ({ viewMode, selectedYear, selectedDepartment }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Determine the year range based on selectedYear
-                const years = selectedYear ? [selectedYear] : Array.from({ length: 2020 - 2012 + 1 }, (v, k) => 2012 + k);
+                // Build the params object conditionally
+                const params = {};
+                if (viewMode) params.period = viewMode.charAt(0).toUpperCase() + viewMode.slice(1);
+                if (selectedDepartment) params.departmentNameKey = selectedDepartment;
+                if (selectedYear) params.year = selectedYear;
 
-                // Fetch data for each year and accumulate it
-                const promises = years.map(year =>
-                    axios.get('http://localhost:8080/analytics/get-timeline-data', {
-                        params: {
-                            year,
-                            period: viewMode.charAt(0).toUpperCase() + viewMode.slice(1), // Capitalize the first letter
-                            department: selectedDepartment || 'All',
-                        },
-                    })
-                );
+                const response = await axios.get('http://localhost:8080/analytics/get-timeline-data', { params });
 
-                const responses = await Promise.all(promises);
+                const { expensesTimeline, revenueTimeline } = response.data;
 
-                // Merge the data from all the responses
-                const mergedData = responses.reduce(
-                    (acc, response) => {
-                        const { expensesTimeline, revenueTimeline } = response.data;
-
-                        acc.labels.push(...revenueTimeline.map(item => item.period));
-                        acc.revenue.push(...revenueTimeline.map(item => item.amount));
-                        acc.expenses.push(...expensesTimeline.map(item => item.amount));
-
-                        return acc;
-                    },
-                    { labels: [], revenue: [], expenses: [] }
-                );
+                const labels = revenueTimeline.map(item => item.period);
+                const revenue = revenueTimeline.map(item => item.amount);
+                const expenses = expensesTimeline.map(item => item.amount);
 
                 setChartData({
-                    labels: mergedData.labels,
+                    labels,
                     datasets: [
                         {
                             label: selectedYear ? `Revenue (USD) for ${selectedYear}` : 'Revenue (USD)',
-                            data: mergedData.revenue,
+                            data: revenue,
                             fill: false,
                             backgroundColor: 'rgba(255, 99, 132, 0.2)',
                             borderColor: 'rgba(255, 99, 132, 1)',
                             borderWidth: 1,
                         },
                         {
-                            label: selectedYear ? `Expenses  (USD) for ${selectedYear} ` : 'Expenses (USD)',
-                            data: mergedData.expenses,
+                            label: selectedYear ? `Expenses (USD) for ${selectedYear}` : 'Expenses (USD)',
+                            data: expenses,
                             fill: false,
                             backgroundColor: 'rgba(54, 162, 235, 0.2)',
                             borderColor: 'rgba(54, 162, 235, 1)',
@@ -73,6 +57,7 @@ const LineChart = ({ viewMode, selectedYear, selectedDepartment }) => {
 
         fetchData();
     }, [viewMode, selectedYear, selectedDepartment]);
+
 
     const options = {
         plugins: {
@@ -95,7 +80,7 @@ const LineChart = ({ viewMode, selectedYear, selectedDepartment }) => {
         },
     };
 
-    const chartTitle = selectedDepartment ? `Timeline of ${selectedDepartment} Department` : 'Timeline';
+    const chartTitle = selectedDepartment ? `Timeline` : 'Timeline';
 
     return (
         <div>
