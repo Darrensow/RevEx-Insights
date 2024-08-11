@@ -40,9 +40,36 @@ public class AnalyticsController implements AnalyticsApi {
     @Override
     @GetMapping("/initiate-analytics-dashboard")
     public ResponseEntity<List<Map<String, String>>> initiateAnalyticsDashboard() {
+
         String logPrefix = "initiateAnalyticsDashboard";
+
         List<Map<String, String>> departmentNamesAndKeysMap = analyticsService.getDepartmentNamesAndKeysAsMap();
         log.info(logPrefix + " departmentNamesAndKeysMap : {}", departmentNamesAndKeysMap);
+
         return new ResponseEntity<>(departmentNamesAndKeysMap, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<Map<String, BigDecimal>>> getExpensesBreakdown(Integer year, String departmentNameKey) {
+
+        String logPrefix = "[AnalyticsController] getExpensesBreakdown";
+
+        List<Map<String, BigDecimal>> expensesBreakdown = analyticsService.getExpensesBreakdown(year, departmentNameKey);
+        log.info("{} expensesBreakdown: {}", logPrefix, expensesBreakdown);
+
+        return new ResponseEntity<>(expensesBreakdown, HttpStatus.OK);
+
+    }
+
+    @Override
+    public ResponseEntity<List<Map<String, BigDecimal>>> getRevenueAndExpensesBreakdown(Integer year, String departmentNameKey) {
+
+        String logPrefix = "[AnalyticsController] getRevenueAndExpensesBreakdown";
+
+        List<Map<String, BigDecimal>> revenueAndExpensesBreakdown = analyticsService.getRevenueAndExpensesBreakdown(year, departmentNameKey);
+        log.info("{} revenueAndExpensesBreakdown: {}", logPrefix, revenueAndExpensesBreakdown);
+
+        return new ResponseEntity<>(revenueAndExpensesBreakdown, HttpStatus.OK);
+
     }
 }

@@ -4,6 +4,8 @@ import com.revex.backend.model.TimelineItem;
 import com.revex.backend.model.TimelineResponseModel;
 import com.revex.backend.model.entity.LedgerBean;
 import com.revex.backend.model.projection.DepartmentProjection;
+import com.revex.backend.model.projection.ExpensesBreakdownProjection;
+import com.revex.backend.model.projection.RevenueAndExpensesBreakdownProjection;
 import com.revex.backend.model.projection.TimelineItemProjection;
 import com.revex.backend.model.repository.DepartmentRepository;
 import com.revex.backend.model.repository.LedgerRepository;
@@ -64,12 +66,34 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     @Override
     public List<Map<String, BigDecimal>> getExpensesBreakdown(Integer year, String departmentNameKey) {
-        return null;
+
+        String logPrefix = "[AnalyticsServiceImpl] getExpensesBreakdown";
+
+        List<ExpensesBreakdownProjection> breakdowns = ledgerRepository.findExpensesBreakdownByYearAndDepartment(year, departmentNameKey);
+
+        List<Map<String, BigDecimal>> expensesBreakdownModel = breakdowns.stream()
+                .map(projection -> Map.of(projection.getFundDescription(), projection.getTotalAmount()))
+                .collect(Collectors.toList());
+
+        log.info("{} expensesBreakdownModel : {}", logPrefix, expensesBreakdownModel);
+
+        return expensesBreakdownModel;
     }
 
     @Override
     public List<Map<String, BigDecimal>> getRevenueAndExpensesBreakdown(Integer year, String departmentNameKey) {
-        return null;
+
+        String logPrefix = "[AnalyticsServiceImpl] getRevenueAndExpensesBreakdown";
+
+        List<RevenueAndExpensesBreakdownProjection> breakdowns = ledgerRepository.findRevenueAndExpensesBreakdownByYearAndDepartment(year, departmentNameKey);
+
+        List<Map<String, BigDecimal>> revenueAndExpensesBreakdownModel = breakdowns.stream()
+                .map(projection -> Map.of(projection.getLedgerDescription(), projection.getTotalAmount()))
+                .collect(Collectors.toList());
+
+        log.info(logPrefix + "revenueAndExpensesBreakdownModel : {}", revenueAndExpensesBreakdownModel);
+
+        return revenueAndExpensesBreakdownModel;
     }
 
     //////////////////////////////////////////  BELOW ARE HELPER FUNCTIONS  ///////////////////////////////////////////
