@@ -1,31 +1,45 @@
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 const DonutChart = () => {
     const data = {
         labels: ['Revenue', 'Expense'],
         datasets: [
             {
-                label: 'Amount Spent (USD)',
-                data: [4000000, 6000000],
+                label: 'Revenue vs Expense',
+                data: [70, 30],
                 backgroundColor: [
-                    'rgba(255, 99, 132, 0.6)',
                     'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
                 ],
                 borderColor: [
-                    'rgba(255, 99, 132, 1)',
                     'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
                 ],
-                borderWidth: 3,
+                borderWidth: 1,
             },
         ],
     };
 
     const options = {
-        cutout: '70%', // This makes it a donut chart by cutting out the middle
+        plugins: {
+            datalabels: {
+                formatter: (value, context) => {
+                    const total = context.chart._metasets[0].total;
+                    const percentage = ((value / total) * 100).toFixed(1) + '%';
+                    return percentage;
+                },
+                color: '#',
+                font: {
+                    weight: 'bolder',
+                    size: '20px'
+                },
+            },
+        },
     };
 
     return <Doughnut data={data} options={options} />;

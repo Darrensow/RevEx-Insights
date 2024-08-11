@@ -1,16 +1,17 @@
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 const PieChart = () => {
     const data = {
         labels: ['General Fund', 'Debt', 'Project Fund', 'Grants', 'Hospital Fee'],
         datasets: [
             {
-                label: 'Expense Type',
-                data: [12, 19, 3, 5, 2],
+                label: 'Expense Breakdown',
+                data: [30, 20, 15, 25, 10],
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.6)',
                     'rgba(54, 162, 235, 0.6)',
@@ -25,12 +26,29 @@ const PieChart = () => {
                     'rgba(75, 192, 192, 1)',
                     'rgba(153, 102, 255, 1)',
                 ],
-                borderWidth: 3,
+                borderWidth: 1,
             },
         ],
     };
 
-    return <Pie data={data} />;
+    const options = {
+        plugins: {
+            datalabels: {
+                formatter: (value, context) => {
+                    const total = context.chart._metasets[0].total;
+                    const percentage = ((value / total) * 100).toFixed(1) + '%';
+                    return percentage;
+                },
+                color: '#',
+                font: {
+                    weight: 'bolder',
+                    size: '15px'
+                },
+            },
+        },
+    };
+
+    return <Pie data={data} options={options} />;
 };
 
 export default PieChart;
