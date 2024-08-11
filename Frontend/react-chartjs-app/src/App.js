@@ -6,6 +6,7 @@ import PieChart from './PieChart';
 import DonutChart from './DonutChart';
 import { Calendar } from 'primereact/calendar';
 import DataTableComponent from './DataTableComponent';
+import DepartmentTableComponent from './DepartmentTableComponent'; // Import the new component
 import { Button } from 'primereact/button';
 
 import 'primereact/resources/themes/saga-blue/theme.css';
@@ -15,8 +16,9 @@ import 'primeflex/primeflex.css';
 
 function App() {
   const [dates, setDates] = useState(null);
-  const [viewMode, setViewMode] = useState('monthly');
+  const [viewMode, setViewMode] = useState('yearly');
   const [selectedYear, setSelectedYear] = useState(null);
+  const [selectedDepartment, setSelectedDepartment] = useState('');
 
   const maxDate = new Date(2020, 11, 31);
   const minDate = new Date(2012, 1, 1);
@@ -87,7 +89,11 @@ function App() {
             />
           </div>
           <p className='DeptFilter'>Select Department</p>
-          <select className="department-filter">
+          <select
+            className="department-filter"
+            value={selectedDepartment}
+            onChange={(e) => setSelectedDepartment(e.target.value)}
+          >
             <option value="">All Departments</option>
             <option value="Sales">Sales</option>
             <option value="Marketing">Marketing</option>
@@ -100,30 +106,26 @@ function App() {
       <div className="chart-container">
         <div className='pie'>
           <div className="chart pie-chart">
-            <p className='BreakdownText'>Breakdown of Expense</p>
-            <hr></hr>
-            <PieChart />
+            <PieChart viewMode={viewMode} selectedDepartment={selectedDepartment} selectedYear={selectedYear} />
           </div>
           <div className="chart donut-chart">
             <p className='RevenueText'>Revenue vs Expense</p>
             <hr></hr>
-            <DonutChart />
+            <DonutChart viewMode={viewMode} selectedYear={selectedYear} selectedDepartment={selectedDepartment} />
           </div>
         </div>
         <div className="chart line-chart">
-          <p className='LineText'>Timeline</p>
-          <hr></hr>
-          <LineChart viewMode={viewMode} selectedYear={selectedYear} />
+          <LineChart viewMode={viewMode} selectedYear={selectedYear} selectedDepartment={selectedDepartment} />
         </div>
         <div className="chart bar-chart">
-          <p className='BarText'>Profit vs Loss</p>
-          <hr></hr>
-          <BarChart viewMode={viewMode} selectedYear={selectedYear} />
+          <BarChart viewMode={viewMode} selectedYear={selectedYear} selectedDepartment={selectedDepartment} />
         </div>
         <div className="table-container" style={{ marginTop: '20px' }}>
-          <p className='TableText'>Department Financial Table</p>
-          <hr></hr>
-          <DataTableComponent />
+          {!selectedDepartment ? (
+            <DataTableComponent viewMode={viewMode} selectedYear={selectedYear} />
+          ) : (
+            <DepartmentTableComponent selectedDepartment={selectedDepartment} viewMode={viewMode} selectedYear={selectedYear} />
+          )}
         </div>
       </div>
     </div>

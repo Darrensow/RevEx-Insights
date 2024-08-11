@@ -5,13 +5,39 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
-const DonutChart = () => {
+const DonutChart = ({ viewMode, selectedDepartment }) => {
+    const dataSets = {
+        yearly: {
+            default: [70, 30],
+            Sales: [65, 35],
+            Marketing: [60, 40],
+            Engineering: [75, 25],
+            HR: [80, 20],
+        },
+        quarterly: {
+            default: [68, 32],
+            Sales: [63, 37],
+            Marketing: [58, 42],
+            Engineering: [73, 27],
+            HR: [78, 22],
+        },
+        monthly: {
+            default: [67, 33],
+            Sales: [62, 38],
+            Marketing: [57, 43],
+            Engineering: [72, 28],
+            HR: [77, 23],
+        },
+    };
+
+    const selectedData = dataSets[viewMode][selectedDepartment] || dataSets[viewMode].default;
+
     const data = {
         labels: ['Revenue', 'Expense'],
         datasets: [
             {
-                label: 'Revenue vs Expense',
-                data: [70, 30],
+                label: `${viewMode.charAt(0).toUpperCase() + viewMode.slice(1)} Revenue vs Expense`,
+                data: selectedData,
                 backgroundColor: [
                     'rgba(54, 162, 235, 0.6)',
                     'rgba(255, 99, 132, 0.6)',
@@ -33,10 +59,10 @@ const DonutChart = () => {
                     const percentage = ((value / total) * 100).toFixed(1) + '%';
                     return percentage;
                 },
-                color: '#',
+                color: '#333',
                 font: {
                     weight: 'bolder',
-                    size: '20px'
+                    size: 20,
                 },
             },
         },
