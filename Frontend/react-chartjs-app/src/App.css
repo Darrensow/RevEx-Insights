@@ -430,6 +430,13 @@ body, html {
 }
 
 
+/* Remove borders from DataTable cells */
+.custom-datatable .p-datatable-thead > tr > th,
+.custom-datatable .p-datatable-tbody > tr > td {
+    border: none;
+}
 
-
-
+/* Remove outer border of the DataTable */
+.custom-datatable {
+    border: none;
+}

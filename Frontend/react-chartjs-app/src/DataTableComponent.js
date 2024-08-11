@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { Button } from 'primereact/button';
-import { InputText } from 'primereact/inputtext';
+import axios from 'axios';
+import './App.css'; // Import the custom CSS
 
 function DataTableComponent({ viewMode, selectedYear }) {
     const [products, setProducts] = useState([]);
@@ -10,38 +10,54 @@ function DataTableComponent({ viewMode, selectedYear }) {
 
     useEffect(() => {
         const fetchData = async () => {
-            let data = [];
-            if (viewMode === 'yearly') {
-                data = [
-                    { department: 'A', revenue: '10,000,000', expense: '5,000,000', ratio: '50%' },
-                    { department: 'B', revenue: '20,000,000', expense: '10,000,000', ratio: '50%' },
-                    { department: 'C', revenue: '30,000,000', expense: '15,000,000', ratio: '50%' },
-                    // Add more yearly data as needed
-                ];
-            } else if (viewMode === 'quarterly') {
-                data = [
-                    { department: 'A', revenue: '2,500,000', expense: '1,250,000', ratio: '50%' },
-                    { department: 'B', revenue: '5,000,000', expense: '2,500,000', ratio: '50%' },
-                    { department: 'C', revenue: '7,500,000', expense: '3,750,000', ratio: '50%' },
-                    // Add more quarterly data as needed
-                ];
-            } else if (viewMode === 'monthly') {
-                data = [
-                    { department: 'A', revenue: '833,333', expense: '416,666', ratio: '50%' },
-                    { department: 'B', revenue: '1,666,666', expense: '833,333', ratio: '50%' },
-                    { department: 'C', revenue: '2,500,000', expense: '1,250,000', ratio: '50%' },
-                    // Add more monthly data as needed
-                ];
+            try {
+                const params = {};
+
+                if (selectedYear) params.year = selectedYear;
+
+                const response = await axios.get('http://localhost:8080/analytics/get-financial-table-data', { params });
+                const data = response.data;
+
+                const formattedData = data.map(item => {
+                    const revenue = item.revenue || 0;
+                    const expense = item.expenses || 0;
+                    const ratio = expense > 0 ? Math.floor((revenue / expense) * 100) : '0';
+                    return {
+                        department: item.description,
+                        revenue,
+                        expense,
+                        ratio: `${ratio}%`
+                    };
+                });
+
+                setProducts(formattedData);
+            } catch (error) {
+                console.error('Error fetching data:', error);
             }
-            setProducts(data);
         };
+
         fetchData();
-    }, [viewMode]);
+    }, [viewMode, selectedYear]);
 
     const chartTitle = selectedYear ? `Department Financial Table of ${selectedYear}` : 'Department Financial Table';
 
-    return (
+    // Function to format the currency without decimals
+    const formatCurrency = (value) => {
+        const roundedValue = Math.round(value); // Round to the nearest whole number
+        return roundedValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    };
 
+    // Custom template for the revenue column
+    const revenueBodyTemplate = (product) => {
+        return formatCurrency(product.revenue);
+    };
+
+    // Custom template for the expense column
+    const expenseBodyTemplate = (product) => {
+        return formatCurrency(product.expense);
+    };
+
+    return (
         <div className="table-container">
             <p className='LineText'>{chartTitle}</p>
             <hr />
@@ -52,11 +68,11 @@ function DataTableComponent({ viewMode, selectedYear }) {
                 globalFilter={globalFilter}
                 sortMode="multiple"
                 emptyMessage="No products found."
-                className="p-datatable-sm"
+                className="p-datatable-sm custom-datatable" // Apply the custom class
             >
                 <Column field="department" header="Department" sortable />
-                <Column field="revenue" header="Revenue (USD)" sortable />
-                <Column field="expense" header="Expense (USD)" sortable />
+                <Column field="revenue" header="Revenue" body={revenueBodyTemplate} sortable />
+                <Column field="expense" header="Expense" body={expenseBodyTemplate} sortable />
                 <Column field="ratio" header="Ratio (%)" sortable />
             </DataTable>
         </div>

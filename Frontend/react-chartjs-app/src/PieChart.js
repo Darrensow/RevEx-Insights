@@ -116,7 +116,7 @@ const PieChart = ({ viewMode, selectedDepartment, selectedYear }) => {
         },
     };
 
-    const chartTitle = selectedYear ? `Breakdown of Expense` : 'Breakdown of Expense';
+    const chartTitle = selectedYear ? `Breakdown of Expenses` : 'Breakdown of Expenses';
 
     return (
         <div>

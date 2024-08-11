@@ -74,7 +74,7 @@ function App() {
     <div className="App">
       <header className="header">
         <div className="dashboard-name">
-          RexEx Insights
+          RevEx Insights
         </div>
         <div className="filters">
           <p className='filter'>Choose Year :</p>
@@ -131,7 +131,7 @@ function App() {
             <PieChart viewMode={viewMode} selectedDepartment={selectedDepartment} selectedYear={selectedYear} />
           </div>
           <div className="chart donut-chart">
-            <p className='RevenueText'>Revenue vs Expense</p>
+            <p className='RevenueText'>Revenues vs Expenses</p>
             <hr></hr>
             <DonutChart viewMode={viewMode} selectedYear={selectedYear} selectedDepartment={selectedDepartment} />
           </div>
