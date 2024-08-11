@@ -1,12 +1,3 @@
-//buildscript {
-//	repositories {
-//		mavenCentral()
-//	}
-//	dependencies {
-//		classpath('io.swagger.codegen.v3:swagger-codegen-maven-plugin:3.0.16')
-//	}
-//}
-
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.2'
@@ -59,7 +50,8 @@ openApiGenerate {
 	modelPackage = "com.revex.backend.model"
 	invokerPackage = "com.revex.backend.invoker"
 	configOptions = [
-			dateLibrary: "java8"
+			dateLibrary: "java8",
+			interfaceOnly: "true"
 	]
 	additionalProperties = [
 			"useTags": "true"  // This tells the generator to group by tags
