@@ -267,7 +267,7 @@ body, html {
   background-color: #f3f3f3;
   border-radius: 10px;
   box-sizing: border-box;
-  margin-top: 30px;
+  /* margin-top: 30px; */
 }
 
 .pie {
@@ -415,6 +415,20 @@ body, html {
     max-width: 100%;
   }
 }
+
+.chart-view-buttons {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+  margin-top: 15px;
+}
+
+.chart-view-buttons .p-button-outlined {
+  margin-right: 10px;
+  background-color: white;
+  border-radius: 6px;
+}
+
 
 
 

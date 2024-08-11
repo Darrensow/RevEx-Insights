@@ -1,30 +1,28 @@
-// src/App.js
-
 import React, { useState } from 'react';
 import './App.css';
 import BarChart from './BarChart';
 import LineChart from './LineChart';
 import PieChart from './PieChart';
 import DonutChart from './DonutChart';
-import { Calendar } from 'primereact/calendar';  // Import PrimeReact Calendar
-import DataTableComponent from './DataTableComponent';  // Import the DataTableComponent
+import { Calendar } from 'primereact/calendar';
+import DataTableComponent from './DataTableComponent';
 import { Button } from 'primereact/button';
 
-import 'primereact/resources/themes/saga-blue/theme.css';  // or another theme
+import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 
-
 function App() {
   const [dates, setDates] = useState(null);
+  const [viewMode, setViewMode] = useState('monthly');
+  const [selectedYear, setSelectedYear] = useState(null);
 
   const maxDate = new Date(2020, 11, 31);
+  const minDate = new Date(2012, 1, 1);
 
-  // Set initial view date to December 2020
   const initialViewDate = new Date(2020, 11, 1);
 
-  // Function to set the last 60 days from maxDate
   const selectLast60Days = () => {
     const endDate = maxDate;
     const startDate = new Date(endDate);
@@ -32,7 +30,6 @@ function App() {
     setDates([startDate, endDate]);
   };
 
-  // Function to set the last 90 days from maxDate
   const selectLast90Days = () => {
     const endDate = maxDate;
     const startDate = new Date(endDate);
@@ -40,6 +37,11 @@ function App() {
     setDates([startDate, endDate]);
   };
 
+  // Handle year selection
+  const handleYearChange = (e) => {
+    const year = e.value ? e.value.getFullYear() : null;
+    setSelectedYear(year);
+  };
 
   return (
     <div className="App">
@@ -49,16 +51,38 @@ function App() {
         </div>
         <div className="filters">
           <p className='filter'>Date Range</p>
-          <Calendar value={dates} onChange={(e) => setDates(e.value)} maxDate={maxDate} viewDate={initialViewDate} selectionMode="range" dateFormat="dd/mm/yy" readOnlyInput hideOnRangeSelection showIcon placeholder="Select Date Range" />
-          <div className="quick-select-buttons">
+          <Calendar
+            value={dates}
+            onChange={(e) => {
+              setDates(e.value);
+              handleYearChange(e);  // Call the function to update the selected year
+            }}
+            minDate={minDate}
+            maxDate={maxDate}
+            viewDate={initialViewDate}
+            view="year"
+            dateFormat="yy"
+            readOnlyInput
+            hideOnRangeSelection
+            showIcon
+            placeholder="Select Year"
+          />
+          <div className="chart-view-buttons">
+            {!dates && (
+              <Button
+                label="Yearly"
+                onClick={() => setViewMode('yearly')}
+                className="p-button-outlined p-mr-2"
+              />
+            )}
             <Button
-              label="Last 60 Days"
-              onClick={selectLast60Days}
+              label="Quarterly"
+              onClick={() => setViewMode('quarterly')}
               className="p-button-outlined p-mr-2"
             />
             <Button
-              label="Last 90 Days"
-              onClick={selectLast90Days}
+              label="Monthly"
+              onClick={() => setViewMode('monthly')}
               className="p-button-outlined"
             />
           </div>
@@ -72,6 +96,7 @@ function App() {
           </select>
         </div>
       </header>
+
       <div className="chart-container">
         <div className='pie'>
           <div className="chart pie-chart">
@@ -88,20 +113,19 @@ function App() {
         <div className="chart line-chart">
           <p className='LineText'>Timeline</p>
           <hr></hr>
-          <LineChart />
+          <LineChart viewMode={viewMode} selectedYear={selectedYear} />
         </div>
         <div className="chart bar-chart">
           <p className='BarText'>Profit vs Loss</p>
           <hr></hr>
-          <BarChart />
+          <BarChart viewMode={viewMode} selectedYear={selectedYear} />
         </div>
         <div className="table-container" style={{ marginTop: '20px' }}>
           <p className='TableText'>Department Financial Table</p>
           <hr></hr>
-          <DataTableComponent /> {/* Use the DataTableComponent */}
+          <DataTableComponent />
         </div>
       </div>
-
     </div>
   );
 }
