@@ -27,8 +27,8 @@ paths:
                 type: array
                 items:
                   type: string
-                  description: Unique identifier for the analytics data
-                  example: "12345"
+                  description: List of departments that are available to be used as filters
+                  example: "Department of Public Safety - Police"
 
   /get-timeline-data:
     get:
@@ -39,25 +39,21 @@ paths:
       description: >
         Returns the filters and other fields for dashboard functionalities.
       parameters:
-        - name: dateFrom
+        - name: year
           in: query
-          required: true
           description: Start date for the timeline data
           schema:
-            type: string
+            type: number
             format: date
-            example: "2024-08-01"
-        - name: dateTo
+            example: "2012"
+        - name: period
           in: query
-          required: true
           description: End date for the timeline data
           schema:
             type: string
-            format: date
-            example: "2024-08-10"
+            example: "[Quarterly, Yearly, Monthly]"
         - name: department
           in: query
-          required: true
           description: Department to filter the timeline data
           schema:
             type: string
@@ -68,9 +64,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TimelineItem'
+                $ref: '#/components/schemas/TimelineResponseModel'
 
   /get-top-n-fund-description-breakdown:
     post:
@@ -201,24 +195,44 @@ components:
           description: Variable used for filtering based on departments
           example: "Police Department"
 
+    TimelineResponseModel:
+      type: object
+      description: Response body with all data related to timeline
+      properties:
+        expensesTimeline:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimelineItem'
+          description: An array of timeline items related to expenses
+        revenueTimeline:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimelineItem'
+          description: An array of timeline items related to revenue
+        surplusDeficitTimeline:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimelineItem'
+          description: An array of timeline items related to surplus or deficit
+
     TimelineItem:
       type: object
       description: Used to display the time series line chart for analytics
       properties:
-        amount:
-          type: number
-          description: The y-value representing the amount
-          example: "12345.67"
+        timelineItemType:
+          type: string
+          description: A label for the timeline item whether this is a revenue or an expenses
+          example: "[Revenue, Expenses, SurplusDeficit]"
         timestamp:
           type: string
           format: date
-          description: The x-value representing the timestamp
+          description: The x-value representing the timestamp (Year, Month or Day)
           example: "2024-08-10T14:48:00Z"
-        label:
+        timestampDisplay:
           type: string
-          description: A label for the timeline item
-          example: "Revenue"
-        surplusOrDeficit:
+          description: The x-value used for display to represent the timestamp
+          example: "[2012, ..., 2020] OR [January, ..., December] OR [1, 2, ..., 31]"
+        timelineAmount:
           type: number
-          description: The percentage of surplus or deficit
-          example: "5.00"
+          description: The y-value representing the amount of revenue or expenses or surplusDeficit (%)
+          example: "373000"
