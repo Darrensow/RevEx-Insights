@@ -1,6 +1,5 @@
 package com.revex.backend.model.repository;
 
-import com.revex.backend.model.TimelineItem;
 import com.revex.backend.model.entity.LedgerBean;
 import com.revex.backend.model.projection.TimelineItemProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
