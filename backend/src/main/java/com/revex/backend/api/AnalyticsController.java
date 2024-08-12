@@ -3,6 +3,7 @@ package com.revex.backend.api;
 import com.revex.backend.model.FinancialTableItem;
 import com.revex.backend.model.TimelineResponseModel;
 import com.revex.backend.service.AnalyticsService;
+import com.revex.backend.service.RateLimiterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import java.util.Map;
 public class AnalyticsController implements AnalyticsApi {
 
     private final AnalyticsService analyticsService;
+    private final RateLimiterService rateLimiterService;
 
     @GetMapping("/get-timeline-data")
     public ResponseEntity<TimelineResponseModel> getTimelineData(
@@ -27,7 +29,9 @@ public class AnalyticsController implements AnalyticsApi {
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) String departmentNameKey
     ) {
-
+        if (!rateLimiterService.isRequestAllowed()) {
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+        }
         String logPrefix = "getTimelineData";
         log.info(logPrefix + " year : {}", year);
         log.info(logPrefix + " period : {}", period);
@@ -41,7 +45,9 @@ public class AnalyticsController implements AnalyticsApi {
     @Override
     @GetMapping("/initiate-analytics-dashboard")
     public ResponseEntity<List<Map<String, String>>> initiateAnalyticsDashboard() {
-
+        if (!rateLimiterService.isRequestAllowed()) {
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+        }
         String logPrefix = "initiateAnalyticsDashboard";
 
         List<Map<String, String>> departmentNamesAndKeysMap = analyticsService.getDepartmentNamesAndKeysAsMap();
@@ -52,7 +58,9 @@ public class AnalyticsController implements AnalyticsApi {
 
     @Override
     public ResponseEntity<List<Map<String, BigDecimal>>> getExpensesBreakdown(Integer year, String departmentNameKey) {
-
+        if (!rateLimiterService.isRequestAllowed()) {
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+        }
         String logPrefix = "[AnalyticsController] getExpensesBreakdown";
 
         List<Map<String, BigDecimal>> expensesBreakdown = analyticsService.getExpensesBreakdown(year, departmentNameKey);
@@ -64,7 +72,9 @@ public class AnalyticsController implements AnalyticsApi {
 
     @Override
     public ResponseEntity<List<Map<String, BigDecimal>>> getRevenueAndExpensesBreakdown(Integer year, String departmentNameKey) {
-
+        if (!rateLimiterService.isRequestAllowed()) {
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+        }
         String logPrefix = "[AnalyticsController] getRevenueAndExpensesBreakdown";
 
         List<Map<String, BigDecimal>> revenueAndExpensesBreakdown = analyticsService.getRevenueAndExpensesBreakdown(year, departmentNameKey);
@@ -76,6 +86,9 @@ public class AnalyticsController implements AnalyticsApi {
 
     @Override
     public ResponseEntity<List<FinancialTableItem>> getFinancialTableData(Integer year, String departmentNameKey) {
+        if (!rateLimiterService.isRequestAllowed()) {
+            return new ResponseEntity<>(HttpStatus.TOO_MANY_REQUESTS);
+        }
         String logPrefix = "getFinancialTableData";
 
         List<FinancialTableItem> financialTableItems = analyticsService.getFinancialTableData(year, departmentNameKey);
