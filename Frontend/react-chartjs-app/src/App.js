@@ -16,6 +16,7 @@ import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 
 function App() {
+  const [user, setUser] = useState({});
   const [dates, setDates] = useState(null);
   const [viewMode, setViewMode] = useState('yearly');
   const [selectedYear, setSelectedYear] = useState(null);
@@ -26,6 +27,19 @@ function App() {
   const minDate = new Date(2012, 1, 1);
 
   const initialViewDate = new Date(2020, 11, 1);
+
+  function handleCallbackResponse(response) {
+    console.log("encoded JWT ID token" + response.credential);
+    var userObject = jwtDecode(response.credential);
+    console.log(userObject);
+    setUser(userObject);
+    document.getElementById("signInDiv").hidden = true;
+  }
+
+  function handleSignOut(event) {
+    setUser({});
+    document.getElementById("signInDiv").hidden = false;
+  }
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -46,111 +60,147 @@ function App() {
       }
     };
 
-    fetchDepartments();
+    // Fetch departments only if the user is logged in
+    if (Object.keys(user).length !== 0) {
+      fetchDepartments();
+    }
+  }, [user]); // Re-fetch departments if the user logs in or out
+
+  useEffect(() => {
+    /* global google */
+    google.accounts.id.initialize({
+      client_id: "563714540171-a3gqflpcqqci17dkb4g046r87of37vpo.apps.googleusercontent.com",
+      callback: handleCallbackResponse
+    });
+    google.accounts.id.renderButton(
+        document.getElementById("signInDiv"),
+        { theme: "outline", size: "large" }
+    );
+    google.accounts.id.prompt();
   }, []);
 
-  // Handle year selection
-  const handleYearChange = (e) => {
-    const year = e.value ? e.value.getFullYear() : null;
-
-    if (selectedDepartment && viewMode === 'yearly') {
-      alert('Year selection is disabled when a department is chosen in "Yearly" mode. Please select a different View Mode or clear the department.');
-      return; // Prevent the year from being set
-    }
-
-    setSelectedYear(year);
-  };
-
-  // Handle setting view mode to yearly and reset selectedYear and dates if viewMode is 'yearly'
-  const handleViewModeChange = (mode) => {
-    if (mode === 'yearly') {
-      setSelectedYear(null);  // Reset the selectedYear to null
-      setDates(null);  // Reset the calendar input to null
-    }
-    setViewMode(mode);
-  };
-
   return (
-    <div className="App">
-      <header className="header">
-        <div className="dashboard-name">
-          RevEx Insights
-        </div>
-        <div className="filters">
-          <p className='filter'>Choose Year :</p>
-          <Calendar
-            value={dates}
-            onChange={(e) => {
-              setDates(e.value);
-              handleYearChange(e);  // Call the function to update the selected year
-            }}
-            minDate={minDate}
-            maxDate={maxDate}
-            viewDate={initialViewDate}
-            view="year"
-            dateFormat="yy"
-            readOnlyInput
-            hideOnRangeSelection
-            showIcon
-            placeholder="Select Year"
-          />
-          <div className="chart-view-buttons">
-            <Button
-              label="Yearly"
-              onClick={() => handleViewModeChange('yearly')}
-              className="p-button-outlined p-mr-2"
-            />
-            <Button
-              label="Quarterly"
-              onClick={() => handleViewModeChange('quarterly')}
-              className="p-button-outlined p-mr-2"
-            />
-            <Button
-              label="Monthly"
-              onClick={() => handleViewModeChange('monthly')}
-              className="p-button-outlined"
-            />
-          </div>
-          <p className='DeptFilter'>Select Department :</p>
-          <select
-            className="department-filter"
-            value={selectedDepartment}
-            onChange={(e) => setSelectedDepartment(e.target.value)}
-          >
-            <option value="">All Departments</option>
-            {departments.map((dept) => (
-              <option key={dept.value} value={dept.value}>{dept.label}</option>
-            ))}
-          </select>
-        </div>
-      </header>
+      <div className="App">
+        <div id="signInDiv"></div>
 
-      <div className="chart-container">
-        <div className='pie'>
-          <div className="chart pie-chart">
-            <PieChart viewMode={viewMode} selectedDepartment={selectedDepartment} selectedYear={selectedYear} />
-          </div>
-          <div className="chart donut-chart">
-            <p className='RevenueText'>Revenues vs Expenses</p>
-            <hr></hr>
-            <DonutChart viewMode={viewMode} selectedYear={selectedYear} selectedDepartment={selectedDepartment} />
-          </div>
-        </div>
-        <div className="chart line-chart">
-          <LineChart viewMode={viewMode} selectedYear={selectedYear} selectedDepartment={selectedDepartment} />
-        </div>
-        <div className="chart bar-chart">
-          <BarChart viewMode={viewMode} selectedYear={selectedYear} selectedDepartment={selectedDepartment} />
-        </div>
-        <div className="table-container" style={{ marginTop: '20px' }}>
-          {!selectedDepartment ? (
-            <DataTableComponent viewMode={viewMode} selectedYear={selectedYear} />
-          ) : (
-            <DepartmentTableComponent selectedDepartment={selectedDepartment} viewMode={viewMode} selectedYear={selectedYear} />
-          )}
-        </div>
+        {Object.keys(user).length === 0 ? (
+            <div id="signInDiv"></div>
+        ) : (
+            <div>
+              <button onClick={(e) => handleSignOut(e)}>Sign Out</button>
+              <div>
+                <img src={user.picture} alt="User"></img>
+                <h3>{user.name}</h3>
+              </div>
+            </div>
+        )}
+
+        {Object.keys(user).length !== 0 && (
+            <>
+              <header className="header">
+                <div className="dashboard-name">RevEx Insights</div>
+                <div className="filters">
+                  <p className="filter">Choose Year :</p>
+                  <Calendar
+                      value={dates}
+                      onChange={(e) => {
+                        setDates(e.value);
+                        handleYearChange(e); // Call the function to update the selected year
+                      }}
+                      minDate={minDate}
+                      maxDate={maxDate}
+                      viewDate={initialViewDate}
+                      view="year"
+                      dateFormat="yy"
+                      readOnlyInput
+                      hideOnRangeSelection
+                      showIcon
+                      placeholder="Select Year"
+                  />
+                  <div className="chart-view-buttons">
+                    <Button
+                        label="Yearly"
+                        onClick={() => handleViewModeChange('yearly')}
+                        className="p-button-outlined p-mr-2"
+                    />
+                    <Button
+                        label="Quarterly"
+                        onClick={() => handleViewModeChange('quarterly')}
+                        className="p-button-outlined p-mr-2"
+                    />
+                    <Button
+                        label="Monthly"
+                        onClick={() => handleViewModeChange('monthly')}
+                        className="p-button-outlined"
+                    />
+                  </div>
+                  <p className="DeptFilter">Select Department :</p>
+                  <select
+                      className="department-filter"
+                      value={selectedDepartment}
+                      onChange={(e) => setSelectedDepartment(e.target.value)}
+                  >
+                    <option value="">All Departments</option>
+                    {departments.map((dept) => (
+                        <option key={dept.value} value={dept.value}>
+                          {dept.label}
+                        </option>
+                    ))}
+                  </select>
+                </div>
+              </header>
+
+              <div className="chart-container">
+                <div className="pie">
+                  <div className="chart pie-chart">
+                    <PieChart
+                        viewMode={viewMode}
+                        selectedDepartment={selectedDepartment}
+                        selectedYear={selectedYear}
+                    />
+                  </div>
+                  <div className="chart donut-chart">
+                    <p className="RevenueText">Revenues vs Expenses</p>
+                    <hr />
+                    <DonutChart
+                        viewMode={viewMode}
+                        selectedYear={selectedYear}
+                        selectedDepartment={selectedDepartment}
+                    />
+                  </div>
+                </div>
+                <div className="chart line-chart">
+                  <LineChart
+                      viewMode={viewMode}
+                      selectedYear={selectedYear}
+                      selectedDepartment={selectedDepartment}
+                  />
+                </div>
+                <div className="chart bar-chart">
+                  <BarChart
+                      viewMode={viewMode}
+                      selectedYear={selectedYear}
+                      selectedDepartment={selectedDepartment}
+                  />
+                </div>
+                <div className="table-container" style={{ marginTop: '20px' }}>
+                  {!selectedDepartment ? (
+                      <DataTableComponent
+                          viewMode={viewMode}
+                          selectedYear={selectedYear}
+                      />
+                  ) : (
+                      <DepartmentTableComponent
+                          selectedDepartment={selectedDepartment}
+                          viewMode={viewMode}
+                          selectedYear={selectedYear}
+                      />
+                  )}
+                </div>
+              </div>
+            </>
+        )}
       </div>
-    </div>
   );
 }
 
