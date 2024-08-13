@@ -64,7 +64,6 @@ Before you begin, ensure you have met the following requirements:
    3. ```insert_fund_sql_statements_part_1.sql```
    4. ```insert_ledger_sql_statements_part_1.sql```
 
-5. 
 
 ## Running the Project
 
