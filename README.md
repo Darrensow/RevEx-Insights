@@ -119,3 +119,11 @@ We have integrated a CI/CD pipeline to streamline the development and deployment
   
 ### How to Trigger the Pipeline:
 Simply push your changes to the repository or create a pull request. The pipeline will automatically run, and you can monitor its progress through your CI/CD service
+
+## Data Acknowledgement
+
+We would like to express our gratitude to [data.gov](https://data.gov) for providing the data used in this project. The financial data related to city revenues and expenses used in the RevEx Insights Analytics Dashboard was sourced from the [City Revenues and Expenses dataset](https://catalog.data.gov/dataset/city-revenues-and-expenses).
+
+This data has been instrumental in the development and analysis processes of our project, allowing us to provide accurate and insightful analytics. We acknowledge the efforts of the data providers and the data.gov platform for making such valuable datasets publicly available.
+
+For more information, please visit the [City Revenues and Expenses dataset](https://catalog.data.gov/dataset/city-revenues-and-expenses) on data.gov.
