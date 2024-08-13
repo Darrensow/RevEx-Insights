@@ -53,12 +53,13 @@ This will start the project on http://localhost:3000 by default.
 
 ## CI/CD Pipeline
 
-We have integrated a CI/CD pipeline to streamline the development and deployment process through the GitHub Actions. The pipeline automatically triggers on every push or pull request to the repository, ensuring that all code changes are tested and deployed efficiently.
+We have integrated a CI/CD pipeline to streamline the development and deployment process through the GitHub Actions to push to the Docker Hub. The pipeline automatically triggers on every push or pull request to the repository, ensuring that all code changes are tested and deployed efficiently.
 
 ### Key Features:
 * Automated Testing: The pipeline runs all the test cases to verify that the new code does not break any existing functionality.
 * Build and Deployment: Upon successful testing, the application is automatically built and deployed to the staging/production environment.
 * Notifications: Developers receive notifications on the status of the build and deployment, helping to maintain the quality and reliability of the application.
+* Rollback mechanism: The repository will be updated with tags to allow reverting to previous tags and the CI/CD pipeline will correctly push it to the Docker Hub
   
 ### How to Trigger the Pipeline:
 Simply push your changes to the repository or create a pull request. The pipeline will automatically run, and you can monitor its progress through your CI/CD service
